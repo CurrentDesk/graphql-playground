@@ -1,4 +1,4 @@
-import { BrowserWindow, app, ipcMain } from 'electron'
+import { BrowserWindow, app, session, ipcMain } from 'electron'
 import * as path from 'path'
 import dev = require('electron-is-dev')
 import { newWindowConfig } from '../shared/utils'
@@ -14,6 +14,11 @@ export function createWindow(windowContext: WindowContext) {
       ? 'http://localhost:4040' // Dev server ran by react-scripts
       : `file://${path.join(__dirname, '..', '/dist/index.html')}`, // Bundled application
   )
+  
+  session.defaultSession.webRequest.onBeforeSendHeaders((details, callback) => {
+    details.requestHeaders['Origin'] = 'electron://graphql-playground';
+    callback({ cancel: false, requestHeaders: details.requestHeaders });
+  });
 
   if (dev) {
     // If dev mode install react and redux extension
